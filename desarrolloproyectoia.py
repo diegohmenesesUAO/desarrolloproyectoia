@@ -3,12 +3,12 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
-import ipywidgets as widgets  # Asegúrate de importar ipywidgets
+import ipywidgets as widgets  
 from IPython.display import display, clear_output
 import io
 import matplotlib.pyplot as plt
 import warnings
-warnings.filterwarnings("ignore")  # Ignorar advertencias para limpiar la salida del notebook
+warnings.filterwarnings("ignore")  
 
 # Función para preprocesar los datos
 def preprocess_data(data):
@@ -42,21 +42,21 @@ def feature_importance(regressor, X):
     }).sort_values(by='Importance', ascending=False)
     return feature_importance_df
 
-# Función principal que combina todas las anteriores
+# Función principal que une todas las anteriores
 def analyze_data(uploaded_file):
     data = pd.read_csv(uploaded_file)
     X, y = preprocess_data(data)
     regressor, mse, r2 = train_model(X, y)
     feature_importance_df = feature_importance(regressor, X)
     
-    # Mostrar los resultados
+    # Muestro los resultados al usuario final
     print("**Predicción de la Huella de Carbono**")
     print(f'R-squared (Coeficiente de Determinación): {r2:.2f}')
     print(f'Mean Squared Error (Error Cuadrático Medio): {mse:.2f}')
     print("\n**Identificación de Factores Significativos**")
     display(feature_importance_df)
     
-    # Visualización de la importancia de las características
+    # muestro de la importancia de las características
     plt.figure(figsize=(10, 6))
     plt.barh(feature_importance_df['Feature'], feature_importance_df['Importance'], color='Aquamarine')
     plt.xlabel('Importancia')
@@ -73,11 +73,11 @@ def on_file_upload_change(change):
     uploaded_file = list(change['new'].values())[0]['content']
     analyze_data(io.StringIO(uploaded_file.decode('utf-8')))
 
-# Crear el widget de carga de archivos
+# Creo el widget de carga de archivos
 file_upload = widgets.FileUpload(accept='.csv', multiple=False)
 file_upload.observe(on_file_upload_change, names='value')
 
-# Mostrar el widget
+# Muestro el widget
 display(file_upload)
 
 # --- Pruebas Unitarias ---
@@ -86,7 +86,7 @@ import unittest
 class TestCarbonEmissionModel(unittest.TestCase):
 
     def setUp(self):
-        # Cargar un conjunto de datos pequeño de ejemplo
+        # Cargo un conjunto de datos pequeño de ejemplo
         data = {
             'Sex': ['Male', 'Female', 'Female', 'Male'],
             'Diet': ['Meat', 'Vegetarian', 'Vegan', 'Meat'],
