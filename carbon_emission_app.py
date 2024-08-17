@@ -38,21 +38,21 @@ def feature_importance(regressor, X):
     }).sort_values(by='Importance', ascending=False)
     return feature_importance_df
 
-# Nueva función analyze_data que encapsula todo el análisis
+# función que encapsula todo el análisis
 def analyze_data(uploaded_file):
     data = pd.read_csv(uploaded_file)
     X, y = preprocess_data(data)
     regressor, mse, r2 = train_model(X, y)
     feature_importance_df = feature_importance(regressor, X)
 
-    # Mostrar los resultados al usuario final
+    # Muestro los resultados al usuario final
     st.write("**Predicción de la Huella de Carbono**")
     st.write(f'R-squared (Coeficiente de Determinación): {r2:.2f}')
     st.write(f'Mean Squared Error (Error Cuadrático Medio): {mse:.2f}')
     st.write("**Identificación de Factores Significativos**")
     st.dataframe(feature_importance_df)
 
-    # Graficar la importancia de las características
+    # Grafico la importancia de las características
     plt.figure(figsize=(10, 6))
     plt.barh(feature_importance_df['Feature'], feature_importance_df['Importance'], color='Aquamarine')
     plt.xlabel('Importancia')
@@ -65,7 +65,7 @@ def analyze_data(uploaded_file):
 class TestCarbonEmissionModel(unittest.TestCase):
 
     def setUp(self):
-        # Crear un conjunto de datos de ejemplo
+        # Creo un conjunto de datos de ejemplo
         data = {
             'Sex': ['Male', 'Female', 'Female', 'Male'],
             'Diet': ['Meat', 'Vegetarian', 'Vegan', 'Meat'],
@@ -84,8 +84,8 @@ class TestCarbonEmissionModel(unittest.TestCase):
     def test_preprocess_data(self):
         """Prueba que la función preprocess_data retorna X e y correctamente."""
         X, y = preprocess_data(self.df)
-        self.assertEqual(X.shape[1], self.df.shape[1] - 1)  # X debe tener una columna menos que df
-        self.assertEqual(len(y), len(self.df))  # y debe tener la misma longitud que el número de filas en df
+        self.assertEqual(X.shape[1], self.df.shape[1] - 1)  
+        self.assertEqual(len(y), len(self.df)) 
 
     def test_train_model(self):
         """Prueba que el modelo se entrena y que el R^2 es mayor que 0."""
@@ -101,15 +101,15 @@ class TestCarbonEmissionModel(unittest.TestCase):
         self.assertTrue('Feature' in importance_df.columns)
         self.assertTrue('Importance' in importance_df.columns)
 
-# Ejecutar las pruebas si se ejecuta directamente este archivo
+# Ejecución de las pruebas si se ejecuta directamente este archivo
 if __name__ == '__main__':
     unittest.main(argv=[''], exit=False)
 
-# Crear la interfaz de usuario en Streamlit
+# Creeo la interfaz de usuario en Streamlit
 st.title("Análisis de Huella de Carbono")
 st.write("Sube un archivo CSV para analizar las emisiones de carbono.")
 
-# Cargar el archivo CSV
+# Cargue  del archivo CSV
 uploaded_file = st.file_uploader("Sube tu archivo CSV", type=["csv"])
 
 # Ejecutar el análisis si se ha cargado un archivo
