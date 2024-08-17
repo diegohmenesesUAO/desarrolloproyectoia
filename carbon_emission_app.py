@@ -3,16 +3,14 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
-import ipywidgets as widgets  
-from IPython.display import display, clear_output
-import io
+import streamlit as st
 import matplotlib.pyplot as plt
 import warnings
-warnings.filterwarnings("ignore")  
+warnings.filterwarnings("ignore")
+import unittest
 
 # Función para preprocesar los datos
 def preprocess_data(data):
-    """Preprocesa los datos, codifica variables categóricas y separa características y objetivo."""
     categorical_columns = data.select_dtypes(include=['object']).columns
     label_encoder = LabelEncoder()
     for column in categorical_columns:
@@ -23,7 +21,6 @@ def preprocess_data(data):
 
 # Función para entrenar el modelo
 def train_model(X, y):
-    """Entrena un modelo de RandomForest y retorna el modelo entrenado y las métricas de evaluación."""
     regressor = RandomForestRegressor(n_estimators=10, random_state=0, oob_score=True)
     regressor.fit(X, y)
     predictions = regressor.predict(X)
@@ -33,7 +30,6 @@ def train_model(X, y):
 
 # Función para calcular la importancia de las características
 def feature_importance(regressor, X):
-    """Calcula la importancia de las características."""
     feature_importances = regressor.feature_importances_
     feature_names = X.columns
     feature_importance_df = pd.DataFrame({
@@ -42,51 +38,34 @@ def feature_importance(regressor, X):
     }).sort_values(by='Importance', ascending=False)
     return feature_importance_df
 
-# Función principal que une todas las anteriores
+# Nueva función analyze_data que encapsula todo el análisis
 def analyze_data(uploaded_file):
     data = pd.read_csv(uploaded_file)
     X, y = preprocess_data(data)
     regressor, mse, r2 = train_model(X, y)
     feature_importance_df = feature_importance(regressor, X)
-    
-    # Muestro los resultados al usuario final
-    print("**Predicción de la Huella de Carbono**")
-    print(f'R-squared (Coeficiente de Determinación): {r2:.2f}')
-    print(f'Mean Squared Error (Error Cuadrático Medio): {mse:.2f}')
-    print("\n**Identificación de Factores Significativos**")
-    display(feature_importance_df)
-    
-    # muestro de la importancia de las características
+
+    # Mostrar los resultados al usuario final
+    st.write("**Predicción de la Huella de Carbono**")
+    st.write(f'R-squared (Coeficiente de Determinación): {r2:.2f}')
+    st.write(f'Mean Squared Error (Error Cuadrático Medio): {mse:.2f}')
+    st.write("**Identificación de Factores Significativos**")
+    st.dataframe(feature_importance_df)
+
+    # Graficar la importancia de las características
     plt.figure(figsize=(10, 6))
     plt.barh(feature_importance_df['Feature'], feature_importance_df['Importance'], color='Aquamarine')
     plt.xlabel('Importancia')
     plt.ylabel('Variable')
     plt.title('Importancia de las Variables en la Predicción de Emisiones de Carbono')
     plt.gca().invert_yaxis()
-    plt.show()
-    
-    return mse, r2, feature_importance_df
+    st.pyplot(plt)
 
-# Función para manejar la carga del archivo
-def on_file_upload_change(change):
-    clear_output()
-    uploaded_file = list(change['new'].values())[0]['content']
-    analyze_data(io.StringIO(uploaded_file.decode('utf-8')))
-
-# Creo el widget de carga de archivos
-file_upload = widgets.FileUpload(accept='.csv', multiple=False)
-file_upload.observe(on_file_upload_change, names='value')
-
-# Muestro el widget
-display(file_upload)
-
-# --- Pruebas Unitarias ---
-import unittest
-
+# Pruebas Unitarias
 class TestCarbonEmissionModel(unittest.TestCase):
 
     def setUp(self):
-        # Cargo un conjunto de datos pequeño de ejemplo
+        # Crear un conjunto de datos de ejemplo
         data = {
             'Sex': ['Male', 'Female', 'Female', 'Male'],
             'Diet': ['Meat', 'Vegetarian', 'Vegan', 'Meat'],
@@ -102,6 +81,12 @@ class TestCarbonEmissionModel(unittest.TestCase):
         self.df = pd.DataFrame(data)
         self.X, self.y = preprocess_data(self.df)
 
+    def test_preprocess_data(self):
+        """Prueba que la función preprocess_data retorna X e y correctamente."""
+        X, y = preprocess_data(self.df)
+        self.assertEqual(X.shape[1], self.df.shape[1] - 1)  # X debe tener una columna menos que df
+        self.assertEqual(len(y), len(self.df))  # y debe tener la misma longitud que el número de filas en df
+
     def test_train_model(self):
         """Prueba que el modelo se entrena y que el R^2 es mayor que 0."""
         regressor, mse, r2 = train_model(self.X, self.y)
@@ -116,5 +101,17 @@ class TestCarbonEmissionModel(unittest.TestCase):
         self.assertTrue('Feature' in importance_df.columns)
         self.assertTrue('Importance' in importance_df.columns)
 
+# Ejecutar las pruebas si se ejecuta directamente este archivo
 if __name__ == '__main__':
     unittest.main(argv=[''], exit=False)
+
+# Crear la interfaz de usuario en Streamlit
+st.title("Análisis de Huella de Carbono")
+st.write("Sube un archivo CSV para analizar las emisiones de carbono.")
+
+# Cargar el archivo CSV
+uploaded_file = st.file_uploader("Sube tu archivo CSV", type=["csv"])
+
+# Ejecutar el análisis si se ha cargado un archivo
+if uploaded_file is not None:
+    analyze_data(uploaded_file)
