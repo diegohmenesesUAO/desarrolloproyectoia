@@ -29,6 +29,7 @@ unittest
 - `carbon_emission_app.py`: Contiene el código principal del proyecto, incluyendo la lógica para el análisis y las pruebas unitarias.
 - `README.md`: Este archivo, que proporciona instrucciones sobre cómo ejecutar el proyecto y las pruebas.
 - `requirements.txt`: Lista de dependencias necesarias para ejecutar el proyecto.
+- `CarbonEmission.csv`: Conjunto de datos de pruebas en CSV 
 
 ## Ejecución de la Aplicación
 
